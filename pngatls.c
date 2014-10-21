@@ -1,7 +1,10 @@
+#define _GNU_SOURCE // strdup and asprintf
 #include <err.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <strings.h>
 #include <unistd.h>
 
 #include <png.h>
@@ -110,7 +113,10 @@ col_clear(png_bytepp p, struct image* i, png_uint_32 x)
 
 static png_byte atLS[5] = { 97, 116, 76, 83 };
 
-static int PNGCBAPI
+static int
+#ifdef PNGCBAPI
+PNGCBAPI
+#endif
 read_chunk_callback(png_structp png, png_unknown_chunkp chunk)
 {
     if (memcmp(chunk->name, atLS, 4))
@@ -274,7 +280,7 @@ write_png(char* filename, struct image* i)
             png_byte data[4*4];
             png_write_chunk_start(png, atLS, strlen(i->filename) + 1 +
                                              sizeof data*(1+trimmed));
-            png_write_chunk_data(png, (png_const_bytep)i->filename,
+            png_write_chunk_data(png, (png_bytep)i->filename,
                                  strlen(i->filename) + 1);
             png_save_uint_32(data+4*0, i->x0);
             png_save_uint_32(data+4*1, i->y0);
